@@ -5,6 +5,7 @@
 package sae.graphe;
 
 import java.awt.Color;
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -13,6 +14,9 @@ import java.util.Set;
 import org.graphstream.graph.Edge;
 import org.graphstream.graph.Graph;
 import org.graphstream.graph.Node;
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.IOException;
 
 /**
  *
@@ -181,10 +185,10 @@ public class Algos {
                 assignedColor++;
             }
 
-             //si jamais la couleur assignée est supérieure au kmax alors ya un conflit
-            if ((assignedColor <= kmax)&&(assignedColor>0))
+             //on attribue la couleur au sommet en vérifiant qu'elle soit valide 
+            if (assignedColor <= kmax)
                 n.setAttribute("wp", assignedColor);
-            else if ((assignedColor <= kmax)&&(assignedColor<=0))
+            else 
                 assignedColor = findAvailableColor(neighborColors, kmax);
             
             
@@ -195,7 +199,7 @@ public class Algos {
             Iterator<Node> it = n.getNeighborNodeIterator();
             while(it.hasNext()){
                 Node voisin = it.next();
-                if ((voisin.getAttribute("wp")==n.getAttribute("wp"))&&(! ispresent(noeuds_traites, voisin)))
+                if ((int)voisin.getAttribute("wp")==(int)n.getAttribute("wp")&&! ispresent(noeuds_traites, voisin))
                     nb_conf++;
             }
             noeuds_traites.remove(n);
@@ -210,16 +214,45 @@ public class Algos {
                 return i;
             }
         }
-        return kmax;
+        return kmax+1;
     }
     
-    private static void afficheCoulNode(Graph g, String attribut){
+    private static String afficheCoulNode(Graph g, String attribut){
+        String chaine="";
         for(Node n:g){
-            System.out.println(n.getId()+";"+n.getAttribute(attribut));
+            chaine+=n.getId()+";"+n.getAttribute(attribut)+"\n";
+        }
+        return chaine;
+    }
+    
+    public static void genererFile(Graph g, String attribut, String cheminfile){
+        cheminfile=concatFile(cheminfile)+".txt";
+        String filePath = "F:/GROSSE SAE C LA SAUCE/SAE JAVA/Evaluation/"+cheminfile;  // Chemin du fichier à créer
+        
+        
+        String content;
+         try (BufferedWriter writer = new BufferedWriter(new FileWriter(filePath))) {
+            content=afficheCoulNode(g, attribut);
+            writer.write(content);
+            System.out.println("Fichier créé avec succès.");
+            writer.close();
+        }catch (IOException e) {
+            System.err.println("Une erreur s'est produite lors de la creation du fichier : " + e.getMessage());
         }
     }
     
-    
+   private static String concatFile(String chemin) {
+        int lastSlashIndex = chemin.lastIndexOf('/');
+        int dotIndex = chemin.indexOf('.', lastSlashIndex);
+
+        if (lastSlashIndex == -1 || dotIndex == -1) {
+            // Si pas de '/' ou de '.' après le '/', retourner une chaîne vide ou lancer une exception
+            return "";
+        }
+
+        // Extraire la sous-chaîne entre le dernier '/' et le '.' après ce '/'
+        return chemin.substring(lastSlashIndex + 1, dotIndex);
+    }
 }
 
 

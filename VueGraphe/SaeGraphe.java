@@ -5,7 +5,10 @@
 package VueGraphe;
 
 import java.util.ArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.SwingUtilities;
+import javax.swing.UnsupportedLookAndFeelException;
 import org.graphstream.graph.Graph;
 import sae.graphe.Algos;
 import sae.graphe.Graphe;
@@ -22,7 +25,12 @@ public class SaeGraphe {
     public static void main(String[] args) {
         //12
         SwingUtilities.invokeLater(()->{
-            Fenetre f = new Fenetre();
+            Fenetre f = null;
+            try {
+                f = new Fenetre();
+            } catch (UnsupportedLookAndFeelException ex) {
+                Logger.getLogger(SaeGraphe.class.getName()).log(Level.SEVERE, null, ex);
+            }
             f.setVisible(true);
         });
 //        Graphe.chargerGraphe("src/SourceFile/graph-test12.txt");

@@ -209,7 +209,7 @@ public class Fenetre extends JFrame {
         
         return infoPanel;
     }
-
+//Update le panel de gauche ou se trouve le Graph
     private void updateGraphPanel() {
         graphPanel.removeAll();
         Viewer viewer = new Viewer(g, Viewer.ThreadingModel.GRAPH_IN_ANOTHER_THREAD);
@@ -225,7 +225,7 @@ public class Fenetre extends JFrame {
         graphPanel.revalidate();
         graphPanel.repaint();
     }
-
+//Permet l'ouverture d'un explorateur de fichier pour choisir les fichier de vols/graph
     private class FileChooserActionListener implements ActionListener{
 
         private String fileType;
@@ -373,7 +373,7 @@ public class Fenetre extends JFrame {
 
         });
     }
-
+//creer le panel d'affichage des vols avec filtrages
     private void initAffichage() {
 
         volPanel = new JPanel();
@@ -444,7 +444,7 @@ public class Fenetre extends JFrame {
         pack();
 
     }
-
+//pas utilisé dans notre code mais présent pour éviter les erreurs
     private class FiltreListener implements DocumentListener {
 
         @Override

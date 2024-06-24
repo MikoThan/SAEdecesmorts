@@ -152,4 +152,14 @@ public class Graphegen {
         return tabv;
     }
 
+    public int getNbaeroports() {
+        return nbaeroports;
+    }
+
+    public int getNbvols() {
+        return nbvols;
+    }
+
+    
+    
 }

@@ -12,7 +12,9 @@ import java.awt.BorderLayout;
 import java.awt.Component;
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
@@ -22,10 +24,20 @@ import java.util.Stack;
 import org.graphstream.graph.*;
 import org.graphstream.graph.implementations.*;
 import javax.swing.JPanel;
+import sae.graphe.Exceptions.FileFormatError;
+import sae.graphe.Exceptions.FileReadError;
 
 public class Graphe extends JPanel{
     private static Graph g;
-    private static int kmax=0;
+    private static int kmax=0, conf=0;
+
+    public static int getConf() {
+        return conf;
+    }
+
+    public static void setConf(int conf) {
+        Graphe.conf = conf;
+    }
     
     public static Graph creerGraphe() {
         Graph graph = new SingleGraph("Nouvelle composante");
@@ -40,17 +52,28 @@ public class Graphe extends JPanel{
         return kmax;
     }
     
-    public static void chargerGraphe(String nom_fichier) {
+    public static void chargerGraphe (String nom_fichier) throws FileFormatError, FileNotFoundException, IOException {
         int nbsommets=0;
         g = new SingleGraph(nom_fichier);
 
         // Le fichier d'entrée
         try (BufferedReader br = new BufferedReader(new FileReader(new File(nom_fichier)))) {
-            kmax = Integer.parseInt(br.readLine());
-            nbsommets=Integer.parseInt(br.readLine());
+            if (!nom_fichier.contains("txt")||!nom_fichier.contains("graph")){
+                throw new FileFormatError(nom_fichier);
+            }
+            else{
+                kmax = Integer.parseInt(br.readLine());
+                nbsommets=Integer.parseInt(br.readLine());
             String ligne;
-            while ((ligne = br.readLine()) != null) {
-
+            while (((ligne = br.readLine()) != null)) {
+                try{
+                    if(ligne.length()>7){
+                        throw new FileReadError(nom_fichier);
+                    }
+                    else if(ligne.length()<3){
+                        throw new FileReadError(nom_fichier);
+                    }
+                    else{
                 String[] ligneDecouper = ligne.split(" ");
                 String som1 = ligneDecouper[0];
                 String som2 = ligneDecouper[1];
@@ -58,21 +81,29 @@ public class Graphe extends JPanel{
                 //ajout ou non des sommets au graphe
                 if (!hasNode(g, som1)) {
                     g.addNode(som1);
-                }
+                    }
                 if (!hasNode(g, som2)) {
                     g.addNode(som2);
-                }
+                    }
                 //ajout ou non de l'arête entre les sommets si non reliés
                 if (!existEdge(g, som1, som2)) {
                     g.addEdge("" + som1 + som2+Math.random(), som1, som2);
+                    }
+                    }
                 }
-
+                catch (EdgeRejectedException | ElementNotFoundException | IdAlreadyInUseException | FileReadError e){
+                    System.out.println(e.getMessage());
+                }
             }
 //            g.display();
-        } catch (Exception e) {
-            e.printStackTrace();
+            }
+        }
+        catch(FileFormatError e){
+            System.out.println(e.getMessage());
         }
     }
+
+    
     //renvoie true si le noeud est déjà dans le graphe
     private static boolean hasNode(Graph g, String sommet) {
         boolean present = false;

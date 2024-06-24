@@ -211,5 +211,12 @@ public class Vol {
         }
     }
 
+    @Override
+    public String toString() {
+        return "Vol{" + "idVol=" + idVol + ", dep=" + dep + ", arrv=" + arrv + ", h=" + h + ", m=" + m + ", t=" + t + '}';
+    }
+    
+    
+
 
 }

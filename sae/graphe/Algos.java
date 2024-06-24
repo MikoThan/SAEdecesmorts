@@ -124,8 +124,7 @@ public class Algos {
             }
             noeuds_traites.remove(n);
         }
-
-        System.out.println("Nombre de conflits: " + nb_conf);
+        Graphe.setConf(nb_conf);
         afficheCoulNode(g, "color");
     }
     //renvoie true si cible est dans le tableau de noeud
@@ -201,7 +200,7 @@ public class Algos {
             }
             noeuds_traites.remove(n);
         }
-        System.out.println("Nombre de conflits: " + nb_conf);
+        Graphe.setConf(nb_conf);
         afficheCoulNode(g, "wp");
     }
     
@@ -215,11 +214,9 @@ public class Algos {
     }
     
     private static void afficheCoulNode(Graph g, String attribut){
-        ArrayList<Integer> coulnode= new ArrayList<>();
         for(Node n:g){
-            coulnode.add(n.getAttribute(attribut));
+            System.out.println(n.getId()+";"+n.getAttribute(attribut));
         }
-        System.out.println(coulnode); 
     }
     
     

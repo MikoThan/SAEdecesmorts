@@ -8,7 +8,7 @@ package sae.graphe;
  * @author iuseh
  */
 public class Vol {
-
+    public final int tdiff = 15;
     private String idVol;
     private Aeroport dep, arrv;
     private int h, m, t;
@@ -54,50 +54,48 @@ public class Vol {
         return Math.sqrt((y2 - y1) * (y2 - y1) + (x2 - x1) * (x2 - x1));
     }
 
-    private int[] addMinutes(int[] temps, int ma) {
+    private double[] addMinutes(double[] temps, double ma) {
 
-        int h = temps[0];
-        int m = temps[1];
+        double h = temps[0];
+        double m = temps[1];
 
-        int totalM = h * 60 + m + ma;
+        Double totalM = h * 60 + m + ma;
 
-        int nH = (totalM / 60) % 24;
-        int nM = totalM % 60;
+        int nH = totalM.intValue() / 60;
+        double nM = totalM % 60;
 
-        if (nH < 0) {
-            nM += 24;
+        return new double[]{nH, nM};
+    }
+
+    private double diffMinutes(double[] time1, double[] time2) {
+
+        double totM1 = time1[0] * 60 + time1[1];
+        double totM2 = time2[0] * 60 + time2[1];
+
+        if (totM1 < totM2){
+            return totM2 - totM1;
+        }
+        else {
+            return totM1 - totM2;
         }
 
-        return new int[]{nH, nM};
     }
 
-    private int diffMinutes(int[] time1, int[] time2) {
 
-        int totM1 = time1[0] * 60 + time1[1];
-        int totM2 = time2[0] * 60 + time2[1];
+    private double[] enMinutes(double[] time1, double[] time2) {
 
-        int diff = totM2 - totM1;
+        double totM1 = time1[0] * 60 + time1[1];
+        double totM2 = time2[0] * 60 + time2[1];
 
-        return diff;
+
+        return new double[]{totM1, totM2};
     }
 
-    private int diffMinutesm(int[] time1, int[] time2, int m1, int m2) {
-
-        int totM1 = time1[0] * 60 + time1[1] + m1;
-        int totM2 = time2[0] * 60 + time2[1] + m2;
-
-        int diff = totM2 - totM1;
-
-        return diff;
-    }
-
-    private int[] enMinutes(int[] time1, int[] time2) {
-
-        int totM1 = time1[0] * 60 + time1[1];
-        int totM2 = time2[0] * 60 + time2[1];
-
-
-        return new int[]{totM1, totM2};
+    private double diff(double a, double b) {
+        if(a > b) {
+            return a - b;
+        }
+        return b - a;
     }
 
     private boolean conflitTemps(Vol v2) {
@@ -107,59 +105,100 @@ public class Vol {
         }
         double vt1 = this.getVitesse();
         double vt2 = v2.getVitesse();
-        double m_arrv1 = (this.compDistanceBetweenPoints(this.getDep().getX(), this.getDep().getY(), inter[0], inter[1]) * 1) / vt1;
-        double m_arrv2 = (this.compDistanceBetweenPoints(v2.getDep().getX(), v2.getDep().getY(), inter[0], inter[1]) * 1) / vt2;
-        int[] t_arrv1fin = this.addMinutes(new int[]{this.getH(), this.getM()}, (int) m_arrv1);
-        int[] t_arrv2fin = this.addMinutes(new int[]{v2.getH(), v2.getM()}, (int) m_arrv2);
+        double m_arrv1 = (this.compDistanceBetweenPoints(this.getDep().getX(), this.getDep().getY(), inter[0], inter[1])) / vt1;
+        double m_arrv2 = (this.compDistanceBetweenPoints(v2.getDep().getX(), v2.getDep().getY(), inter[0], inter[1])) / vt2;
+        double[] t_arrv1fin = this.addMinutes(new double[]{this.getH(), this.getM()}, m_arrv1);
+        double[] t_arrv2fin = this.addMinutes(new double[]{v2.getH(), v2.getM()}, m_arrv2);
 
-        if (Math.abs(diffMinutes(t_arrv1fin, t_arrv2fin)) <= 15) {
+//        System.out.println("This : "+t_arrv1fin[0]+":"+t_arrv1fin[1]+" V2 : "+t_arrv2fin[0]+":"+t_arrv2fin[1]);
+
+        if (diffMinutes(t_arrv1fin, t_arrv2fin) < tdiff) {
             return true;
         }
         return false;
     }
 
     public boolean conflit(Vol v2) {
-        double[] inter = this.getIntersectionCoordonnees(this, v2);
-            if (!v2.getDep().getCode().equals(this.getArrv().getCode()) && !v2.getArrv().getCode().equals(this.getDep().getCode())) {
-                if (this.conflitTemps(v2)) {
-                    return true;
-                }
-            }
-            else if (v2.getDep().getCode().equals(this.getArrv().getCode())){
-                int[] min = enMinutes(new int[]{this.getH(), this.getM()}, new int[]{v2.getH(), v2.getM()});
-                if (Math.abs(min[0]+this.getDuree() - min[1])<= 15) {
-                    return true;
-                }
 
-            }
-            else if (v2.getArrv().getCode().equals(this.getDep().getCode())) {
+        if (!v2.getDep().getCode().equals(this.getArrv().getCode())
+                && !v2.getArrv().getCode().equals(this.getDep().getCode())
+                && !v2.getDep().getCode().equals(this.getDep().getCode())
+                && !v2.getArrv().getCode().equals(this.getArrv().getCode())){
 
-                int[] min = enMinutes(new int[]{this.getH(), this.getM()}, new int[]{v2.getH(), v2.getM()});
-
-                if (Math.abs(min[0] - min[1]+v2.getDuree() )<= 15) {
-                    return true;
-                }
-
-            }
-            else if (v2.getArrv().getCode().equals(this.getArrv().getCode()) && v2.getDep().getCode().equals(this.getDep().getCode())){
+            if (this.conflitTemps(v2)) {
                 return true;
-
-            }
-            else if (v2.getArrv().getCode().equals(this.getArrv().getCode()) ){
-                int[] min = enMinutes(new int[]{this.getH(), this.getM()}, new int[]{v2.getH(), v2.getM()});
-                if (Math.abs(min[0]+this.getDuree() - min[1]+v2.getDuree())<= 15) {
-                    return true;
-                }
-
-            }
-            else if (v2.getDep().getCode().equals(this.getDep().getCode())){
-                int[] min = enMinutes(new int[]{this.getH(), this.getM()}, new int[]{v2.getH(), v2.getM()});
-                if (Math.abs(min[0] - min[1])<= 15) {
-                    return true;
-                }
             }
 
-            return false;
+        }
+
+        else if (v2.getArrv().getCode().equals(this.getArrv().getCode())
+                && v2.getDep().getCode().equals(this.getDep().getCode())){
+
+            double[] min = enMinutes(new double[]{this.getH(), this.getM()}, new double[]{v2.getH(), v2.getM()});
+
+            if (diff(min[0], min[1])< tdiff) {
+                return true;
+            }
+
+        }
+
+        else if (v2.getDep().getCode().equals(this.getArrv().getCode())
+                && v2.getArrv().getCode().equals(this.getDep().getCode())){
+
+            double[] min = enMinutes(new double[]{this.getH(), this.getM()}, new double[]{v2.getH(), v2.getM()});
+            double dv = compDistanceBetweenPoints(this.getDep().getX(), this.getDep().getY(), this.getArrv().getX(), this.getArrv().getY())/2;
+            double temps_pour_atteindre_this = (dv / this.getVitesse());
+            double temps_pour_atteindre_v2 = (dv / v2.getVitesse());
+
+            if (diff(min[0]+this.getDuree(), min[1])< tdiff || diff(min[0], min[1]+v2.getDuree())< tdiff || diff(min[0]+(temps_pour_atteindre_this), min[1]+(temps_pour_atteindre_v2))< tdiff) {
+                return true;
+            }
+
+        }
+
+        else if (v2.getDep().getCode().equals(this.getArrv().getCode())){
+
+            double[] min = enMinutes(new double[]{this.getH(), this.getM()}, new double[]{v2.getH(), v2.getM()});
+
+            if (diff(min[0]+this.getDuree(), min[1])< tdiff) {
+//                System.out.println("" + (min[0]+this.getDuree()) + " " + min[1]);
+                return true;
+            }
+
+        }
+
+        else if (v2.getArrv().getCode().equals(this.getDep().getCode())) {
+
+            double[] min = enMinutes(new double[]{this.getH(), this.getM()}, new double[]{v2.getH(), v2.getM()});
+
+            if (diff(min[0], min[1]+v2.getDuree())< tdiff) {
+                return true;
+            }
+
+        }
+
+
+        else if (v2.getArrv().getCode().equals(this.getArrv().getCode()) ){ // v2 arrive à l'aéroport d'arrivée de this
+
+            double[] min = enMinutes(new double[]{this.getH(), this.getM()}, new double[]{v2.getH(), v2.getM()});
+
+            if (diff(min[0]+this.getDuree(), min[1]+v2.getDuree())< tdiff) {
+                return true;
+            }
+
+        }
+
+        else if (v2.getDep().getCode().equals(this.getDep().getCode())){ // v2 part de l'aéroport de départ de this
+
+            double[] min = enMinutes(new double[]{this.getH(), this.getM()}, new double[]{v2.getH(), v2.getM()});
+
+            if (diff(min[0], min[1])< tdiff) {
+                return true;
+            }
+            
+        }
+
+        return false;
     }
 
     public double[] getIntersectionCoordonnees(Vol v1, Vol v2) {
@@ -178,45 +217,6 @@ public class Vol {
         }
         return null;
     }
-    public boolean estIntersectionSurSegments(double[] intersection, Vol v1, Vol v2) {
-        if(intersection!=null){
-            double x = intersection[0];
-            double y = intersection[1];
-
-            double minX1 = Math.min(v1.getDep().getX(), v1.getArrv().getX());
-            double maxX1 = Math.max(v1.getDep().getX(), v1.getArrv().getX());
-            double minY1 = Math.min(v1.getDep().getY(), v1.getArrv().getY());
-            double maxY1 = Math.max(v1.getDep().getY(), v1.getArrv().getY());
-
-            double minX2 = Math.min(v2.getDep().getX(), v2.getArrv().getX());
-            double maxX2 = Math.max(v2.getDep().getX(), v2.getArrv().getX());
-            double minY2 = Math.min(v2.getDep().getY(), v2.getArrv().getY());
-            double maxY2 = Math.max(v2.getDep().getY(), v2.getArrv().getY());
-
-            if (x >= minX1 && x <= maxX1 && y >= minY1 && y <= maxY1 && x >= minX2 && x <= maxX2 && y >= minY2 && y <= maxY2) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    public class Point {
-        public double x;
-        public double y;
-
-        public Point(double x, double y) {
-            this.x = x;
-            this.y = y;
-        }
-    }
-
-    @Override
-    public String toString() {
-        return "Vol{" + "idVol=" + idVol + ", dep=" + dep + ", arrv=" + arrv + ", h=" + h + ", m=" + m + ", t=" + t + '}';
-    }
-    
-    
 
 
 }

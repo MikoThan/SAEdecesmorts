@@ -64,6 +64,7 @@ public class Fenetre extends JFrame {
     private Vol[] vols;
     private VolModel modelevol = new VolModel();
     private Graph g;
+    private MapViewerPanel viewPanel = new MapViewerPanel();;
     private JTable tablevols = new JTable(modelevol);
     private final ImageIcon icon = new ImageIcon("E:/GROSSE SAE C LA SAUCE/SAE JAVA/Sae graphe/attention.gif");
     private final ImageIcon alarme = new ImageIcon("E:/GROSSE SAE C LA SAUCE/SAE JAVA/Sae graphe/alarme.gif");
@@ -142,7 +143,7 @@ public class Fenetre extends JFrame {
         String[] algorithms = {"WelshPowell", "DSATUR"};
         algorithmComboBox = new JComboBox<>(algorithms);
         cont.gridy = 6;
-        infoPanel.add(new JLabel("Choix d'algorithme de coloration"), cont);
+        infoPanel.add(new JLabel("Choix de l'algorithme de coloration"), cont);
         cont.gridy = 7;
         infoPanel.add(algorithmComboBox, cont);
 
@@ -190,10 +191,18 @@ public class Fenetre extends JFrame {
                         Algos.WelshPowell(g, kmax);
                         conflits.setText("Nombre de conflits : "+Graphe.getConf());
                         Algos.coloriergraphe(g, kmax, "wp");
+                        if (graphFilePath.equals(""))
+                            Algos.genererFile( g, "wp", flightsFilePath);
+                        else
+                            Algos.genererFile( g, "wp", graphFilePath);
                     } else {
                         Algos.Dsatur(g, kmax);
                         conflits.setText("Nombre de conflits : "+Graphe.getConf());
                         Algos.coloriergraphe(g, kmax, "color");
+                        if (graphFilePath.equals(""))
+                            Algos.genererFile( g, "wp", flightsFilePath);
+                        else
+                            Algos.genererFile( g, "wp", graphFilePath);
                     }
                 }
                 updateGraphPanel();
@@ -319,7 +328,7 @@ public class Fenetre extends JFrame {
         coloriergraphe.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent arg0) {
-
+                viewPanel.close();
                 initUI();
             }
 
@@ -328,6 +337,7 @@ public class Fenetre extends JFrame {
         affichervols.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent arg0) {
+                viewPanel.close();
                 if (flightsFilePath.equals("")) {
                     JOptionPane.showMessageDialog(Fenetre.this, "Le fichier des vols n'est pas chargé","Erreur fichier vols", JOptionPane.ERROR_MESSAGE,icon);
                 } else {
@@ -367,8 +377,11 @@ public class Fenetre extends JFrame {
         affichercarte.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent arg0) {
-                MapViewerPanel viewPanel = new MapViewerPanel(flightsFilePath);
-                viewPanel.visualize();
+                if (!flightsFilePath.equals("")){
+                    viewPanel = new MapViewerPanel(flightsFilePath);
+                    viewPanel.visualize();}
+                else{
+                    viewPanel.visualizeVierge();}
             }
 
         });

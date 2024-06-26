@@ -12,6 +12,7 @@ import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
@@ -27,16 +28,20 @@ import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
+import javax.swing.SwingConstants;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
+import javax.swing.border.LineBorder;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import org.graphstream.graph.Graph;
 import org.graphstream.ui.swingViewer.View;
 import org.graphstream.ui.swingViewer.Viewer;
 import sae.graphe.*;
+import sae.graphe.Vol;
 import sae.graphe.Exceptions.AeroportError;
 import sae.graphe.Exceptions.FileFormatError;
 import vueJXMap.MapViewerPanel;
@@ -46,14 +51,14 @@ import vueJXMap.MapViewerPanel;
  * @author p2300399
  */
 public class Fenetre extends JFrame {
-
+   
     private JPanel graphPanel, volPanel;
     private JLabel infoLabel, degrémoy, nbsom, nbar, nbcompo, diam, conflits=new JLabel("Nombre de conflits : ");
-    private JLabel triid, tridep, triarrv, trih, trit;
+    private JLabel triid, tridep, triarrv, trih, trim, trit;
     private JTextField id, dep, arrv, h, m, t;
     private JComboBox<String> algorithmComboBox;
     private JTextField kMaxField;
-    private JTextField maxMarginField;
+    private static JTextField maxMarginField;
     private String graphFilePath="";
     private String flightsFilePath="";
     private String airportsFilePath="";
@@ -64,10 +69,12 @@ public class Fenetre extends JFrame {
     private Vol[] vols;
     private VolModel modelevol = new VolModel();
     private Graph g;
-    private MapViewerPanel viewPanel = new MapViewerPanel();;
+    private MapViewerPanel viewPanel = new MapViewerPanel();
     private JTable tablevols = new JTable(modelevol);
+    private JScrollPane jsp = new JScrollPane(tablevols);
     private final ImageIcon icon = new ImageIcon("E:/GROSSE SAE C LA SAUCE/SAE JAVA/Sae graphe/attention.gif");
-    private final ImageIcon alarme = new ImageIcon("E:/GROSSE SAE C LA SAUCE/SAE JAVA/Sae graphe/alarme.gif");
+    private final ImageIcon alarme = new ImageIcon("F:/GROSSE SAE C LA SAUCE/SAE JAVA/Sae graphe/alarme.gif");
+     //Ne pas oublier de rechanger la lettre du directory de la clef (elle change à chaque fois cette relou)
     
     public Fenetre() throws UnsupportedLookAndFeelException {
 
@@ -80,19 +87,20 @@ public class Fenetre extends JFrame {
             e.printStackTrace();
         }
         this.setLocation(200, 100);
+        setExtendedState(MAXIMIZED_BOTH);
         setLayout(new BorderLayout());
         initMenu();
 
     }
+    
 //créer le panel global qui va contenir le panel du graphe et le panel de chargement et de coloration
-
     private void initUI() {
         JPanel globalPanel = new JPanel(new BorderLayout());
         if (graphPanel==null)
             initGraphPanel();
         globalPanel.add(graphPanel, BorderLayout.CENTER);
         globalPanel.add(initInfoPanel(), BorderLayout.EAST);
-
+        maxMarginField.setText("15");
         this.setContentPane(globalPanel);
         this.pack();
     }
@@ -101,7 +109,7 @@ public class Fenetre extends JFrame {
     private void initGraphPanel() {
         graphPanel = new JPanel(new BorderLayout());
         graphPanel.setBackground(Color.LIGHT_GRAY);
-        JLabel graphLabel = new JLabel("Graphe");
+        JLabel graphLabel = new JLabel("");
         graphLabel.setFont(new Font("Arial", Font.BOLD, 24));
         graphPanel.add(graphLabel, BorderLayout.NORTH);
     }
@@ -111,6 +119,7 @@ public class Fenetre extends JFrame {
         JPanel infoPanel = new JPanel();
         infoPanel.setLayout(new GridBagLayout());
         GridBagConstraints cont = new GridBagConstraints();
+        cont.insets=new Insets(10,10,10,10);
         cont.fill = GridBagConstraints.BOTH;
         cont.gridx = 0;
         cont.gridy = GridBagConstraints.RELATIVE;
@@ -142,6 +151,7 @@ public class Fenetre extends JFrame {
 
         String[] algorithms = {"WelshPowell", "DSATUR"};
         algorithmComboBox = new JComboBox<>(algorithms);
+        algorithmComboBox.setSelectedItem("DSATUR");
         cont.gridy = 6;
         infoPanel.add(new JLabel("Choix de l'algorithme de coloration"), cont);
         cont.gridy = 7;
@@ -179,35 +189,49 @@ public class Fenetre extends JFrame {
 
         JButton calculateButton = new JButton("Calculer");
         calculateButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
+    @Override
+    public void actionPerformed(ActionEvent e) {
+        try {
+            String kMaxText = kMaxField.getText();
+            String maxMarginText = maxMarginField.getText();
 
-                kmax = Integer.parseInt(kMaxField.getText());
-                if (kmax <= 0) {
-                    JOptionPane.showMessageDialog(Fenetre.this, "Veuillez choisir un kmax strictement positif","Erreur Kmax",JOptionPane.INFORMATION_MESSAGE,alarme);
-                } 
-                else {
-                    if (algorithmComboBox.getSelectedItem().equals("WelshPowell")) {
-                        Algos.WelshPowell(g, kmax);
-                        conflits.setText("Nombre de conflits : "+Graphe.getConf());
-                        Algos.coloriergraphe(g, kmax, "wp");
-                        if (graphFilePath.equals(""))
-                            Algos.genererFile( g, "wp", flightsFilePath);
-                        else
-                            Algos.genererFile( g, "wp", graphFilePath);
-                    } else {
-                        Algos.Dsatur(g, kmax);
-                        conflits.setText("Nombre de conflits : "+Graphe.getConf());
-                        Algos.coloriergraphe(g, kmax, "color");
-                        if (graphFilePath.equals(""))
-                            Algos.genererFile( g, "wp", flightsFilePath);
-                        else
-                            Algos.genererFile( g, "wp", graphFilePath);
-                    }
-                }
-                updateGraphPanel();
+
+            kmax = Integer.parseInt(kMaxText);
+            if (kmax <= 0) {
+                JOptionPane.showMessageDialog(Fenetre.this, "Veuillez choisir un kmax strictement positif", "Erreur Kmax", JOptionPane.INFORMATION_MESSAGE, alarme);
+                return;
             }
-        });
+
+            int maxMargin = Integer.parseInt(maxMarginText);
+            Vol.setTdiff(maxMargin);
+
+            if (algorithmComboBox.getSelectedItem().equals("WelshPowell")) {
+                Algos.WelshPowell(g, kmax);
+                conflits.setText("Nombre de conflits : " + Graphe.getConf());
+                Algos.coloriergraphe(g, kmax, "wp");
+                if (graphFilePath.isEmpty()) {
+                    Algos.genererFile(g, "wp", flightsFilePath);
+                } else {
+                    Algos.genererFile(g, "wp", graphFilePath);
+                }
+            } else {
+                Algos.Dsatur(g, kmax);
+                conflits.setText("Nombre de conflits : " + Graphe.getConf());
+                Algos.coloriergraphe(g, kmax, "color");
+                if (graphFilePath.isEmpty()) {
+                    Algos.genererFile(g, "color", flightsFilePath);
+                } else {
+                    Algos.genererFile(g, "color", graphFilePath);
+                }
+            }
+            
+
+            updateGraphPanel();
+        } catch (Exception ex) {
+           
+        }
+    }
+});
         cont.gridx = 0;
         cont.gridwidth = 3;
         cont.gridy = 13;
@@ -215,7 +239,6 @@ public class Fenetre extends JFrame {
 
         cont.gridy = 14;
         infoPanel.add(conflits, cont);
-        
         return infoPanel;
     }
 //Update le panel de gauche ou se trouve le Graph
@@ -282,6 +305,7 @@ public class Fenetre extends JFrame {
                         }
                             else {
                             flightsFilePath = selectedFile.getAbsolutePath();
+                            maxMarginField.setText("15");
                             Graphegen gen = new Graphegen(airportsFilePath, flightsFilePath);
                             vols = new Vol[gen.getNbvols()];
                             vols = gen.getTabv();
@@ -300,7 +324,7 @@ public class Fenetre extends JFrame {
                     case "airports":
                         
                         if (!selectedFile.getAbsolutePath().contains(".txt")||(!selectedFile.getAbsolutePath().contains("aeroport"))){
-                            JOptionPane.showMessageDialog(Fenetre.this, "Le fichier des aéroports n'est pas au bon format, veuillez le rechoisir","Erreur fichier aéroport", JOptionPane.ERROR_MESSAGE,alarme);
+                            JOptionPane.showMessageDialog(Fenetre.this, "Le fichier des aéroports n'est pas au bon format, veuillez le rechoisir","Erreur fichier aéroport", JOptionPane.ERROR_MESSAGE,icon);
                         }
                         else{
                             airportsFilePath = selectedFile.getAbsolutePath();
@@ -393,57 +417,84 @@ public class Fenetre extends JFrame {
         volPanel.setLayout(new GridBagLayout());
         GridBagConstraints con = new GridBagConstraints();
         con.fill = GridBagConstraints.BOTH;
-
+        con.insets=new Insets(10,10,10,10);
         triid = new JLabel("tri par ID");
+        triid.setBorder(new LineBorder(Color.BLUE));
+        triid.setHorizontalAlignment(SwingConstants.CENTER);
         con.gridx = 1;
         con.gridy = 2;
         volPanel.add(triid, con);
 
         tridep = new JLabel("tri par aéroport de départ");
+        tridep.setBorder(new LineBorder(Color.BLUE));
+        tridep.setHorizontalAlignment(SwingConstants.CENTER);
         con.gridx = 3;
         volPanel.add(tridep, con);
 
         triarrv = new JLabel("tri par aéroport d'arrivée");
+        triarrv.setBorder(new LineBorder(Color.BLUE));
+        triarrv.setHorizontalAlignment(SwingConstants.CENTER);
         con.gridx = 5;
         volPanel.add(triarrv, con);
 
         trih = new JLabel("tri par heure d'arrivée");
+        trih.setBorder(new LineBorder(Color.BLUE));
+        trih.setHorizontalAlignment(SwingConstants.CENTER);
         con.gridx = 7;
         volPanel.add(trih, con);
 
-        trit = new JLabel("tri par temps");
+        trim = new JLabel("tri par minutes");
+        trim.setBorder(new LineBorder(Color.BLUE));
+        trim.setHorizontalAlignment(SwingConstants.CENTER);
         con.gridx = 9;
+        volPanel.add(trim, con);
+        
+        trit = new JLabel("tri par temps");
+        trit.setBorder(new LineBorder(Color.BLUE));
+        trit.setHorizontalAlignment(SwingConstants.CENTER);
+        con.gridx = 11;
         volPanel.add(trit, con);
 
         id = new JTextField(20);
+        id.setHorizontalAlignment(SwingConstants.LEFT);
         con.gridx = 1;
         con.gridy = 3;
         volPanel.add(id, con);
 
         dep = new JTextField(20);
+        dep.setHorizontalAlignment(SwingConstants.CENTER);
         con.gridx = 3;
         volPanel.add(dep, con);
 
         arrv = new JTextField(20);
+        arrv.setHorizontalAlignment(SwingConstants.CENTER);
         con.gridx = 5;
         volPanel.add(arrv, con);
 
         h = new JTextField(20);
+        h.setHorizontalAlignment(SwingConstants.CENTER);
         con.gridx = 7;
         volPanel.add(h, con);
 
         m = new JTextField(20);
+        m.setHorizontalAlignment(SwingConstants.CENTER);
         con.gridx = 9;
         volPanel.add(m, con);
 
         t = new JTextField(20);
+        t.setHorizontalAlignment(SwingConstants.RIGHT);
         con.gridx = 11;
         volPanel.add(t, con);
 
         con.gridx = 1;
         con.gridy = 5;
-
         volPanel.add(tablevols, con);
+        
+        
+        con.gridwidth = GridBagConstraints.REMAINDER; // Span all columns
+        jsp.getViewport().setView(tablevols);
+        volPanel.add(jsp, con);
+        
 
         // Ajout des DocumentListener pour filtrer dynamiquement
         id.getDocument().addDocumentListener(new FiltreListener());
@@ -457,7 +508,7 @@ public class Fenetre extends JFrame {
         pack();
 
     }
-//pas utilisé dans notre code mais présent pour éviter les erreurs
+
     private class FiltreListener implements DocumentListener {
 
         @Override
@@ -519,4 +570,9 @@ public class Fenetre extends JFrame {
         tablevols.revalidate();
         tablevols.repaint();
     }
+
+    public static JTextField getMaxMarginField() {
+        return maxMarginField;
+    }
+
 }

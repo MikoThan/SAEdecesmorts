@@ -15,9 +15,9 @@ import sae.graphe.Vol;
  * @author p2300399
  */
 public class VolModel extends AbstractTableModel {
-    private ArrayList<Vol> vols =new ArrayList<>();
-    private String[] colonnes = {"identifiant", "depart","arrivee","heures","minutes","temps"};
-    private ArrayList<Vol> volsfiltres =new ArrayList<>();
+    private final ArrayList<Vol> vols =new ArrayList<>();
+    private final String[] colonnes = {"identifiant", "depart","arrivee","heures","minutes","temps"};
+    private final ArrayList<Vol> volsfiltres =new ArrayList<>();
     private String filtreId = "";
     private String filtreDep = "";
     private String filtreArrv = "";
@@ -73,11 +73,14 @@ public class VolModel extends AbstractTableModel {
     }
 
     private void appliquerFiltres() {
+        if (filtreId.isEmpty()&&filtreDep.equals("")&&filtreArrv.equals("")&&filtreH.isEmpty()&&filtreM.isEmpty()&&filtreT.isEmpty())
+            reboot();
+        else{
         reboot();
         Iterator<Vol> iterator = volsfiltres.iterator();
         while (iterator.hasNext()) {
             Vol v = iterator.next();
-
+            
             if (!filtreId.isEmpty() && !String.valueOf(v.getIdVol()).toLowerCase().contains(filtreId)) {
                 iterator.remove();
                 continue;
@@ -101,6 +104,7 @@ public class VolModel extends AbstractTableModel {
             }
             if (!filtreT.isEmpty() && !String.valueOf(v.getDuree()).toLowerCase().contains(filtreT)) {
                 iterator.remove();
+            }
             }
         }
 

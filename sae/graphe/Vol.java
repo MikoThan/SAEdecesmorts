@@ -4,14 +4,26 @@
  */
 package sae.graphe;
 
+import VueGraphe.Fenetre;
+
 /**
- * @author iuseh
+ * @author Amjad
  */
 public class Vol {
-    public final int tdiff = 15;
+    public static int tdiff = Integer.parseInt(Fenetre.getMaxMarginField().getText());
     private String idVol;
     private Aeroport dep, arrv;
     private int h, m, t;
+
+    /**
+     * Constructeur
+     * @param idVol identifiant du vol.
+     * @param dep aéroport de départ.
+     * @param arrv aéroport d'arrivée.
+     * @param h heure de départ.
+     * @param m  minutes de départ.
+     * @param t  durée du vol.
+     */
     public Vol(String idVol, Aeroport dep, Aeroport arrv, int h, int m, int t) {
         this.idVol = idVol;
         this.dep = dep;
@@ -21,9 +33,17 @@ public class Vol {
         this.t = t;
     }
 
+    /**
+     * Calcule la vitesse du vol
+     * @return vitesse du vol.
+     */
     public double getVitesse() {
         double distance = compDistanceBetweenPoints(dep.getX(), dep.getY(), arrv.getX(), arrv.getY());
         return distance / t;
+    }
+
+    public static void setTdiff(int tdiff) {
+        Vol.tdiff = tdiff;
     }
 
     public String getIdVol() {
@@ -50,6 +70,14 @@ public class Vol {
         return arrv;
     }
 
+    /**
+     * Calcule la distance entre deux points
+     * @param x1 Coordonnée x du premier point.
+     * @param y1 Coordonnée y du premier point.
+     * @param x2 Coordonnée x du deuxième point.
+     * @param y2 Coordonnée y du deuxième point.
+     * @return distance entre deux points.
+     */
     public double compDistanceBetweenPoints(double x1, double y1, double x2, double y2) {
         return Math.sqrt((y2 - y1) * (y2 - y1) + (x2 - x1) * (x2 - x1));
     }
@@ -98,6 +126,11 @@ public class Vol {
         return b - a;
     }
 
+    /**
+     * Vérifie si deux vols passe par l'intersection de leurs trajectoires à moins de 15 minutes
+     * @param v2 L'autre vol.
+     * @return vrai s'il y a un conflit, faux sinon.
+     */
     private boolean conflitTemps(Vol v2) {
         double[] inter = this.getIntersectionCoordonnees(this, v2);
         if (inter == null) {
@@ -118,6 +151,12 @@ public class Vol {
         return false;
     }
 
+
+    /**
+     * Recherche de conflits
+     * @param v2 L'autre vol.
+     * @return vrai s'il y a un conflit, faux sinon.
+     */
     public boolean conflit(Vol v2) {
 
         if (!v2.getDep().getCode().equals(this.getArrv().getCode())
@@ -201,6 +240,12 @@ public class Vol {
         return false;
     }
 
+    /**
+     * Calcule les coordonnées d'intersection de deux vols
+     * @param v1 Le premier vol.
+     * @param v2 Le deuxième vol.
+     * @return Un tableau de doubles contenant les coordonnées d'intersection.
+     */
     public double[] getIntersectionCoordonnees(Vol v1, Vol v2) {
         double x1 = v1.getDep().getX();
         double y1 = v1.getDep().getY();

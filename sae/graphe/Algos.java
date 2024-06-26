@@ -40,7 +40,7 @@ public class Algos {
         }
     }
    
-    
+    //sert pour le tri
     private static void inserer(ArrayList<Node> tab, int i) {
         Node tmp;
         while (i > 0 && (int)tab.get(i).getDegree() > (int)tab.get(i - 1).getDegree()) {
@@ -50,13 +50,13 @@ public class Algos {
             i -= 1;
         }
     }
-
+    //fonction de tri insertion
     private static void tri(ArrayList<Node> tab, int taille) {
         for (int i = 1; i < taille; i++) {
             inserer(tab, i);
         }
     }
-
+    
     public static void Dsatur(Graph g, int kmax) {
         ArrayList<Node> noeuds = new ArrayList<>();
         ArrayList<Node> noeuds_traites = new ArrayList<>();
@@ -129,7 +129,6 @@ public class Algos {
             noeuds_traites.remove(n);
         }
         Graphe.setConf(nb_conf);
-        afficheCoulNode(g, "color");
     }
     //renvoie true si cible est dans le tableau de noeud
     public static boolean ispresent(ArrayList<Node> nodetab,Node cible){
@@ -205,7 +204,6 @@ public class Algos {
             noeuds_traites.remove(n);
         }
         Graphe.setConf(nb_conf);
-        afficheCoulNode(g, "wp");
     }
     
     private static int findAvailableColor(Set<Integer> neighborColors, int kmax) {

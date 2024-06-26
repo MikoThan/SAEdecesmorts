@@ -38,11 +38,6 @@ public class Graphe extends JPanel{
     public static void setConf(int conf) {
         Graphe.conf = conf;
     }
-    
-    public static Graph creerGraphe() {
-        Graph graph = new SingleGraph("Nouvelle composante");
-        return graph;
-    }
 
     public static Graph getGraphe(){
         return g;
@@ -51,7 +46,16 @@ public class Graphe extends JPanel{
     public static int getKmax() {
         return kmax;
     }
-    
+    //charge un ficier graphe sous format .txt
+
+
+    /**
+     * Charge un graphe à partir d'un fichier
+     * @param nom_fichier Le nom du fichier à charger.
+     * @throws FileFormatError Si le format du fichier est incorrect.
+     * @throws FileNotFoundException Si le fichier n'est pas trouvé.
+     * @throws IOException Si une erreur d'entrée/sortie se produit.
+     */
     public static void chargerGraphe (String nom_fichier) throws FileFormatError, FileNotFoundException, IOException {
         int nbsommets=0;
         g = new SingleGraph(nom_fichier);
@@ -67,7 +71,7 @@ public class Graphe extends JPanel{
             String ligne;
             while (((ligne = br.readLine()) != null)) {
                 try{
-                    if(ligne.length()>7){
+                    if(ligne.length()>9){
                         throw new FileReadError(nom_fichier);
                     }
                     else if(ligne.length()<3){
@@ -103,8 +107,12 @@ public class Graphe extends JPanel{
         }
     }
 
-    
-    //renvoie true si le noeud est déjà dans le graphe
+    /**
+     * Vérifie si un noeud est déjà dans le graphe
+     * @param g Le graphe à vérifier.
+     * @param sommet Le sommet à vérifier.
+     * @return true si le noeud est déjà dans le graphe, false sinon.
+     */
     private static boolean hasNode(Graph g, String sommet) {
         boolean present = false;
         for (Node n : g) {
@@ -115,7 +123,14 @@ public class Graphe extends JPanel{
         }
         return present;
     }
-    //renvoie true si l'arête existe, false sinon
+
+    /**
+     * Vérifie si une arête existe entre deux sommets
+     * @param g Le graphe à vérifier.
+     * @param s1 Le premier sommet.
+     * @param s2 Le deuxième sommet.
+     * @return true si l'arête existe, false sinon.
+     */
     private static boolean existEdge(Graph g, String s1, String s2) {
         boolean exist = false;
         for (Node n : g) {
@@ -132,7 +147,12 @@ public class Graphe extends JPanel{
         }
         return exist;
     }
-    
+
+    /**
+     * Calcule le degré moyen du graphe
+     * @param g Le graphe à utiliser pour le calcul.
+     * @return Le degré moyen du graphe.
+     */
     public static double calculedegremoyen(Graph g){
         int nbdegres=0, somme_degres=0;
         for(Node n:g){
@@ -141,7 +161,12 @@ public class Graphe extends JPanel{
         }
         return somme_degres/nbdegres;
     }
-    
+
+    /**
+     * Calcule et affiche le nombre de noeuds d'un graphe
+     * @param g Le graphe à utiliser pour le calcul.
+     * @return Le nombre de noeuds du graphe.
+     */
     public static int afficheNbNoeuds(Graph g){
         int nbnoeuds=0;
         for(Node n:g){
@@ -149,8 +174,13 @@ public class Graphe extends JPanel{
             }
         return nbnoeuds;
     }
-    
-    
+
+
+    /**
+     * Calcule et affiche le nombre d'arêtes d'un graphe
+     * @param g Le graphe à utiliser pour le calcul.
+     * @return Le nombre d'arêtes du graphe.
+     */
     public static int afficheNbAretes(Graph g){
         ArrayList<Node> noeuds = new ArrayList<>();
         int nbaretes=0;
@@ -165,9 +195,13 @@ public class Graphe extends JPanel{
         }
         return nbaretes;
     }
-    
-    
-    
+
+
+    /**
+     * Calculer et affiche le nombre de composantes connexes d'un graphe
+     * @param g Le graphe à utiliser pour le calcul.
+     * @return Le nombre de composantes connexes du graphe.
+     */
     public static int afficheNbComposantesConnexes(Graph g) {
         int nbCompo = 0;
 
@@ -187,7 +221,12 @@ public class Graphe extends JPanel{
         return nbCompo;
     }
 
-    // Méthode pour effectuer une recherche en profondeur
+
+    /**
+     * Effectue une recherche en profondeur
+     * @param g Le graphe à utiliser pour la recherche.
+     * @param start Le noeud de départ pour la recherche.
+     */
     private static void rechercheprofondeur(Graph g, Node start) {
         Stack<Node> pile = new Stack<>();
         pile.push(start);
@@ -208,7 +247,12 @@ public class Graphe extends JPanel{
             }
         }
     }
-    
+
+    /**
+     * Calcule et affiche le diamètre d'un graphe
+     * @param g Le graphe à utiliser pour le calcul.
+     * @return Le diamètre du graphe.
+     */
     public static int affichediametre(Graph g){
         int diametre=0, i=0;
         for(Node n:g){
@@ -223,8 +267,13 @@ public class Graphe extends JPanel{
         }
         return diametre;
     }
-    
-    // Méthode pour effectuer une recherche en largeur
+
+    /**
+     * Effectuer une recherche grace à un parcours en largeur
+     * @param g Le graphe à utiliser pour la recherche.
+     * @param n Le noeud de départ pour la recherche.
+     * @return La distance maximale trouvée lors de la recherche.
+     */
     private static int parcourslargeur(Graph g, Node n){
         int taille=g.getNodeCount();
         int[] distance= new int[taille];
@@ -254,11 +303,6 @@ public class Graphe extends JPanel{
                 dmax=dist;
             }
         return dmax;
-    }
-    
-    
-    public static String afficheInfosGraphe(Graph g){
-        return "Degre moyen : "+calculedegremoyen(g)+"\n"+"nb noeuds : "+afficheNbNoeuds(g)+"\n"+"Nb aretes : "+afficheNbAretes(g)+"\n"+"Nb composantes connexes : "+afficheNbComposantesConnexes(g)+"\n"+"Diametre : "+affichediametre(g);
     }
 
 }
